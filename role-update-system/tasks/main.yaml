@@ -1,0 +1,7 @@
+---
+- name: update system debian
+  ansible.builtin.apt:
+    autoclean: true
+    autoremove: true
+    upgrade: dist
+  when: ansible_distribution == 'Debian'

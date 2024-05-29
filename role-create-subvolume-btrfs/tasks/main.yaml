@@ -1,0 +1,32 @@
+---
+- name: assert variable
+  ansible.builtin.assert:
+    that:
+      - SUBVOLUME_NAME is defined
+      - SUBVOLUME_DEST is defined
+      - DEVICE_UUID is defined
+    fail_msg: missing variables
+
+- name: Create subvolume
+  become: true
+  community.general.btrfs_subvolume:
+    name: "{{SUBVOLUME_NAME}}"
+    snapshot_conflict: error
+    filesystem_uuid: "{{DEVICE_UUID}}"
+
+- name: change owner of the subvolume
+  become: true
+  ansible.builtin.file:
+    owner: "{{OWNER_ID}}"
+    path: "/mnt/{{SUBVOLUME_NAME}}"
+    group: "1000"
+
+- name: Add mount of subvolume to fstab
+  become: yes
+  ansible.posix.mount:
+    boot: true
+    fstype: btrfs
+    opts: "subvol=/{{SUBVOLUME_NAME}},relatime"
+    path: "{{SUBVOLUME_DEST}}"
+    src: "UUID={{DEVICE_UUID}}"
+    state: mounted

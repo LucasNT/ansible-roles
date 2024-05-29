@@ -1,0 +1,16 @@
+---
+- name: add export entry
+  become: true
+  ansible.builtin.lineinfile:
+    create: true
+    insertafter: EOF
+    regexp: "^{{EXPORT_PATH}}.*"
+    state: present
+    path: /etc/exports
+    line: "{{EXPORT_PATH}}\t{{EXPORT_OPTS}}"
+
+- name: restart nfs service
+  become: true
+  ansible.builtin.service:
+    name: nfsserver
+    state: restarted
