@@ -8,9 +8,5 @@
     state: present
     path: /etc/exports
     line: "{{EXPORT_PATH}}\t{{EXPORT_OPTS}}"
-
-- name: restart nfs service
-  become: true
-  ansible.builtin.service:
-    name: nfsserver
-    state: restarted
+  notify:
+    - restart nfs service
