@@ -1,11 +1,4 @@
 ---
-- name: install dependencies
-  become: true
-  ansible.builtin.package:
-    name: '{{item}}'
-    state: present
-  loop:
-    - awk
 - name: regenerate hosts keys
   include_tasks: hostKeys
   loop:
