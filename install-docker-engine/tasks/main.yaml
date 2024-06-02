@@ -1,0 +1,45 @@
+---
+- name: install  {{item}}
+  become: true
+  ansible.builtin.package:
+    state: present
+    name: "{{item}}"
+  loop:
+    - ca-certificates
+    - curl
+
+- name: create keyrings folder
+  become: true
+  ansible.builtin.file:
+    state: directory
+    path: /etc/apt/keyrings
+    group: root
+    owner: root
+    mode: '755'
+
+- name: download gpg key
+  become: true
+  ansible.builtin.get_url:
+    decompress: false
+    dest: /etc/apt/keyrings/docker.asc
+    url: "https://download.docker.com/linux/debian/gpg"
+    mode: '755'
+
+- name: add docker repo
+  become: true
+  ansible.builtin.apt_repository:
+    repo: "deb [ arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian bookworm stable"
+    state: present
+    filename: docker
+
+- name: install docker engine
+  become: true
+  ansible.builtin.package:
+    state: present
+    name: "{{item}}"
+  loop:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    - docker-buildx-plugin
+    - docker-compose-plugin
