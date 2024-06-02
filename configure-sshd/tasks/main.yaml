@@ -1,6 +1,7 @@
 ---
 - name: regenerate hosts keys
-  include_tasks: hostKeys
+  ansible.builtin.include_tasks:
+    file: hostKeys.yaml
   loop:
     - ed25519
     - ecdsa
@@ -9,7 +10,7 @@
   become: true
   ansible.builtin.shell:
     chdir: /etc/ssh
-    cmd: awk '$5 <= 3071' | wc -l
+    cmd: awk '$5 < 3071' moduli | wc -l
   register: moduliKeys
   changed_when: false
 
@@ -17,7 +18,7 @@
   become: true
   ansible.builtin.shell:
     chdir: /etc/ssh
-    cmd: awk '$5 >= 3071'  moduli > moduli.save ; mv moduli.safe moduli
+    cmd: awk '$5 >= 3071'  moduli > moduli.save ; mv moduli.save moduli
   when: (moduliKeys.stdout | int) > 0
 
 - name:  copy new sshd to remote

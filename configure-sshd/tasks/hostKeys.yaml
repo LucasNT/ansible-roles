@@ -1,11 +1,33 @@
 ---
-- name: remove old keys
-  beome: true
-  ansible.builtin.file:
+- name: test if the key was regenerated
+  ansible.builtin.stat:
     path: /etc/ssh/{{item}}
+  register: key_status
+
+- name: remove old keys
+  become: true
+  ansible.builtin.file:
+    path: /etc/ssh/ssh_host_{{item}}_key
     state: absent
+  when: key_status.stat.exists == false
+
+- name: remove old public keys
+  become: true
+  ansible.builtin.file:
+    path: /etc/ssh/ssh_host_{{item}}_key.pub
+    state: absent
+  when: key_status.stat.exists == false
+
 - name: regenerate keys
-  beome: true
+  become: true
   ansible.builtin.shell:
     chdir: /etc/ssh
     cmd: ssh-keygen -t '{{item}}' -f ssh_host_{{item}}_key -N ""
+  when: key_status.stat.exists == false
+
+- name: create file to don't regenerate next time
+  become: true
+  ansible.builtin.file:
+    state: touch
+    path: /etc/ssh/{{item}}
+  when: key_status.stat.exists == false
