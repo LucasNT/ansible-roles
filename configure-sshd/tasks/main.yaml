@@ -6,17 +6,7 @@
   loop:
     - awk
 - name: regenerate hosts keys
-  block:
-    - name: remove old keys
-      beome: true
-      ansible.builtin.file:
-        path: /etc/ssh/{{item}}
-        state: absent
-    - name: regenerate keys
-      beome: true
-      ansible.builtin.shell:
-        chdir: /etc/ssh
-        cmd: ssh-keygen -t '{{item}}' -f ssh_host_{{item}}_key -N ""
+  include_tasks: hostKeys
   loop:
     - ed25519
     - ecdsa
@@ -27,11 +17,11 @@
     chdir: /etc/ssh
     cmd: awk '$5 <= 3071' | wc -l
   register: moduliKeys
-  change_when: false
+  changed_when: false
 
 - name: edit moduli file
   become: true
-  ansible.builrin.shell:
+  ansible.builtin.shell:
     chdir: /etc/ssh
     cmd: awk '$5 >= 3071'  moduli > moduli.save ; mv moduli.safe moduli
   when: (moduliKeys.stdout | int) > 0
