@@ -1,0 +1,45 @@
+---
+- name: install dependencies
+  ansible.builtin.package:
+    name: '{{item}}'
+    state: present
+  loop:
+    - awk
+- name: regenerate hosts keys
+  block:
+    - name: remove old keys
+      beome: true
+      ansible.builtin.file:
+        path: /etc/ssh/{{item}}
+        state: absent
+    - name: regenerate keys
+      beome: true
+      ansible.builtin.shell:
+        chdir: /etc/ssh
+        cmd: ssh-keygen -t '{{item}}' -f ssh_host_{{item}}_key -N ""
+  loop:
+    - ed25519
+    - ecdsa
+
+- name: test if moduli needs to be rewrite
+  become: true
+  ansible.builtin.shell:
+    chdir: /etc/ssh
+    cmd: awk '$5 <= 3071' | wc -l
+  register: moduliKeys
+  change_when: false
+
+- name: edit moduli file
+  become: true
+  ansible.builrin.shell:
+    chdir: /etc/ssh
+    cmd: awk '$5 >= 3071'  moduli > moduli.save ; mv moduli.safe moduli
+  when: (moduliKeys.stdout | int) > 0
+
+- name:  copy new sshd to remote
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/ssh/
+    src: sshd_config
+  notify:
+    - restart sshd
