@@ -21,10 +21,22 @@
     cmd: awk '$5 >= 3071'  moduli > moduli.save ; mv moduli.save moduli
   when: (moduliKeys.stdout | int) > 0
 
-- name:  copy new sshd to remote
+- name: copy new sshd to remote
   become: true
   ansible.builtin.copy:
     dest: /etc/ssh/
     src: sshd_config
   notify:
     - restart sshd
+
+- name: add ssh_user group to user
+  become: true
+  ansible.builtin.group:
+    name: ssh_user
+
+- name: add user to ssh_user group
+  become: true
+  ansible.builtin.user:
+    append: true
+    groups: ssh_user
+    name: lucas
