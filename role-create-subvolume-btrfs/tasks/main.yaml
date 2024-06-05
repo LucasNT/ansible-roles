@@ -13,6 +13,7 @@
     name: "{{SUBVOLUME_NAME}}"
     snapshot_conflict: error
     filesystem_uuid: "{{DEVICE_UUID}}"
+    state: present
 
 - name: change owner of the subvolume
   become: true
@@ -22,7 +23,7 @@
     group: "1000"
 
 - name: Add mount of subvolume to fstab
-  become: yes
+  become: true
   ansible.posix.mount:
     boot: true
     fstype: btrfs
