@@ -5,7 +5,7 @@
     create: true
     insertafter: EOF
     regexp: "^{{EXPORT_PATH}}.*"
-    state: present
+    state: "{{ 'present' if state else 'absent' }}"
     path: /etc/exports
     line: "{{EXPORT_PATH}}\t{{EXPORT_OPTS}}"
   notify:
