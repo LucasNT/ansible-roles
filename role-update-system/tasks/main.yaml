@@ -31,4 +31,5 @@
   when: ansible_facts['os_family'] == 'RedHat'
 
 - name: reboot system
+  become: true
   ansible.builtin.reboot:
