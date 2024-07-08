@@ -6,6 +6,7 @@
     autoremove: true
     upgrade: dist
   when: ansible_facts['os_family'] == 'Debian'
+  notify: 'role_name : restart machine'
 
 - name: update system based on opensuse
   become: true
@@ -14,6 +15,7 @@
     state: latest
     update_cache: true
   when: ansible_facts['os_family'] == 'Suse'
+  notify: 'role_name : restart machine'
 
 - name: update system based on alpine
   become: true
@@ -21,6 +23,7 @@
     upgrade: true
     update_cache: true
   when: ansible_facts['os_family'] == 'Alpine'
+  notify: 'role_name : restart machine'
 
 - name: update system based on RedHat Linux
   become: true
@@ -29,7 +32,4 @@
     state: latest
     update_cache: true
   when: ansible_facts['os_family'] == 'RedHat'
-
-- name: reboot system
-  become: true
-  ansible.builtin.reboot:
+  notify: 'role_name : restart machine'
