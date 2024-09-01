@@ -1,12 +1,26 @@
 ---
+- name: assert variable
+  ansible.builtin.assert:
+    that:
+      - EXPORT_PATH is defined
+      - EXPORT_OPTS is defined
+      - EXPORT_STATE is defined
+    fail_msg: missing variables
+
 - name: add export entry
   become: true
   ansible.builtin.lineinfile:
     create: true
     insertafter: EOF
     regexp: "^{{EXPORT_PATH}}.*"
-    state: "{{ 'present' if state else 'absent' }}"
+    state: "{{EXPORT_STATE}}"
     path: /etc/exports
     line: "{{EXPORT_PATH}}\t{{EXPORT_OPTS}}"
-  notify:
-    - restart nfs service
+  register: export_entry
+
+- name: restart nfsserver if exportfs changed
+  become: true
+  ansible.builtin.service:
+    name: nfsserver
+    state: restarted
+  when: export_entry.changed
