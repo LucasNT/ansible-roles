@@ -5,29 +5,57 @@
       - SUBVOLUME_NAME is defined
       - SUBVOLUME_DEST is defined
       - DEVICE_UUID is defined
+      - SUBVOLUME_REMOVE == false or SUBVOLUME_REMOVE == true
     fail_msg: missing variables
 
-- name: Create subvolume
-  become: true
-  community.general.btrfs_subvolume:
-    name: "{{SUBVOLUME_NAME}}"
-    snapshot_conflict: error
-    filesystem_uuid: "{{DEVICE_UUID}}"
-    state: present
+- name: add subvolume
+  block:
+    - name: Create subvolume
+      become: true
+      community.general.btrfs_subvolume:
+        name: "{{SUBVOLUME_NAME}}"
+        snapshot_conflict: error
+        filesystem_uuid: "{{DEVICE_UUID}}"
+        state: present
 
-- name: change owner of the subvolume
-  become: true
-  ansible.builtin.file:
-    owner: "{{OWNER_ID}}"
-    path: "/mnt/{{SUBVOLUME_NAME}}"
-    group: "1000"
+    - name: change owner of the subvolume
+      become: true
+      ansible.builtin.file:
+        owner: "{{OWNER_ID}}"
+        path: "/mnt/{{SUBVOLUME_NAME}}"
+        group: "1000"
 
-- name: Add mount of subvolume to fstab
-  become: true
-  ansible.posix.mount:
-    boot: true
-    fstype: btrfs
-    opts: "subvol=/{{SUBVOLUME_NAME}},relatime"
-    path: "{{SUBVOLUME_DEST}}"
-    src: "UUID={{DEVICE_UUID}}"
-    state: mounted
+    - name: Add mount of subvolume to fstab
+      become: true
+      ansible.posix.mount:
+        boot: true
+        fstype: btrfs
+        opts: "subvol=/{{SUBVOLUME_NAME}},relatime"
+        path: "{{SUBVOLUME_DEST}}"
+        src: "UUID={{DEVICE_UUID}}"
+        state: mounted
+
+  when: SUBVOLUME_REMOVE == false
+
+- name: add subvolume
+  block:
+
+    - name: remove mount of subvolume to fstab
+      become: true
+      ansible.posix.mount:
+        boot: true
+        fstype: btrfs
+        opts: "subvol=/{{SUBVOLUME_NAME}},relatime"
+        path: "{{SUBVOLUME_DEST}}"
+        src: "UUID={{DEVICE_UUID}}"
+        state: absent
+
+    - name: Delete subvolume
+      become: true
+      community.general.btrfs_subvolume:
+        name: "{{SUBVOLUME_NAME}}"
+        snapshot_conflict: error
+        filesystem_uuid: "{{DEVICE_UUID}}"
+        state: absent
+
+  when: SUBVOLUME_REMOVE == true
