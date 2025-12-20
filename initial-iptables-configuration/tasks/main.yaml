@@ -1,0 +1,11 @@
+---
+- name: install iptables-persistent
+  become: true
+  ansible.builtin.package:
+    package: iptables-persistent
+    state: present
+- name: generate iptables config
+  become: true
+  ansible.builtin.template:
+    src: ipv4rules
+    dest: /etc/iptables/rules.v4
