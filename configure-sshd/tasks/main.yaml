@@ -39,4 +39,4 @@
   ansible.builtin.user:
     append: true
     groups: ssh_user
-    name: {{ansible_user}}
+    name: "{{ansible_user}}"
