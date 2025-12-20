@@ -1,0 +1,5 @@
+---
+- name: restart machine
+  become: true
+  ansible.builtin.reboot:
+
