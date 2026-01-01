@@ -113,7 +113,7 @@ X11Forwarding no
 #Banner none
 
 # override default of no subsystems
-Subsystem	sftp	/usr/lib/ssh/sftp-server
+Subsystem	sftp	/usr/lib/openssh/sftp-server
 
 #Match User usuario
 #	ChrootDirectory /path/chroot
