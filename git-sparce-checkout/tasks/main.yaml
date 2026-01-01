@@ -7,6 +7,11 @@
       - remote_repo != ""
     fail_msg: missing variables
 
+- name: create dest directory
+  ansible.builtin.file:
+    path: "{{dest}}"
+    state: directory
+
 - name: test if git is initialized
   ansible.builtin.command:
     chdir: "{{dest}}"
