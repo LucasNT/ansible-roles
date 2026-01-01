@@ -9,26 +9,26 @@
 
 - name: test if git is initialized
   ansible.builtin.command:
-    cmd: git
     chdir: "{{dest}}"
     argv:
+      - git
       - rev-parse
       - --is-inside-work-tree
   register: repo_initialized
 
 - name: create repo if repo not created
   ansible.builtin.command:
-    cmd: git
     chdir: "{{dest}}"
     argv:
+      - git
       - init
   when: repo_initialized.rc != 0
 
 - name: add remote if repo not created
   ansible.builtin.command:
-    cmd: git
     chdir: "{{dest}}"
     argv:
+      - git
       - remote
       - add
       - origin
@@ -37,9 +37,9 @@
 
 - name: config sparseCheckout
   ansible.builtin.command:
-    cmd: git
     chdir: "{{dest}}"
     argv:
+      - git
       - config
       - core.sparseCheckout
       - true
@@ -51,9 +51,9 @@
 
 - name: git pull
   ansible.builtin.command:
-    cmd: git
     chdir: "{{dest}}"
     argv:
+      - git
       - pull
       - origin
       - main
